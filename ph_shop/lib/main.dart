@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'shoes.dart';
-
+import 'shoes_detail.dart';
 void main() {
   runApp(const ph_shop());
 }
@@ -55,10 +55,11 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
-    //
+
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body: Row(
@@ -68,7 +69,25 @@ class _MyHomePageState extends State<MyHomePage> {
             child: ListView.builder(
               itemCount: (Shoes.ListShoes.length / 2).ceil(),
               itemBuilder: (BuildContext context, int index) {
-                return buildShoesCard(Shoes.ListShoes[index]);
+                // 7
+                return GestureDetector(
+                  // 8
+                  onTap: () {
+                    // 9
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          // 10
+                          // TODO: Replace return with return RecipeDetail()
+                          return ShoesDetail(shoes: Shoes.ListShoes[index]);
+                        },
+                      ),
+                    );
+                  },
+                  // 11
+                  child: buildShoesCard(Shoes.ListShoes[index]),
+                );
               },
             ),
           ),
@@ -78,7 +97,25 @@ class _MyHomePageState extends State<MyHomePage> {
               itemCount: (Shoes.ListShoes.length / 2).floor(),
               itemBuilder: (BuildContext context, int index) {
                 int rightIndex = index + (Shoes.ListShoes.length / 2).ceil();
-                return buildShoesCard(Shoes.ListShoes[rightIndex]);
+                // 7
+                return GestureDetector(
+                  // 8
+                  onTap: () {
+                    // 9
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          // 10
+                          // TODO: Replace return with return RecipeDetail()
+                         return ShoesDetail(shoes: Shoes.ListShoes[rightIndex]);
+                        },
+                      ),
+                    );
+                  },
+                  // 11
+                  child: buildShoesCard(Shoes.ListShoes[rightIndex]),
+                );
               },
             ),
           ),
@@ -109,9 +146,18 @@ Widget buildShoesCard(Shoes shoes) {
             ],
           ),
           Image(image: AssetImage(shoes.imageUrl)),
-          const SizedBox(height: 14.0),
+          const SizedBox(height: 10.0),
           Text(
             shoes.name,
+            style: const TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'MerriweatherSans',
+            ),
+          ),
+           const SizedBox(height: 5.0),
+            Text(
+            shoes.price,
             style: const TextStyle(
               fontSize: 20.0,
               fontWeight: FontWeight.w700,
