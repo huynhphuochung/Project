@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'shoes.dart';
 import 'shoes_detail.dart';
+
 void main() {
   runApp(const ph_shop());
 }
@@ -8,7 +9,6 @@ void main() {
 class ph_shop extends StatelessWidget {
   const ph_shop({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,7 +26,6 @@ class ph_shop extends StatelessWidget {
           foregroundColor: Colors.black,
         ),
       ),
-
       home: const MyHomePage(title: 'PH SHOP'),
     );
   }
@@ -35,15 +34,6 @@ class ph_shop extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -51,121 +41,190 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String? _selectedBranch; // Biến để lưu thương hiệu được chọn
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    // Lọc danh sách giày theo thương hiệu nếu _selectedBranch không null
+    final filteredShoes = _selectedBranch != null
+        ? Shoes.ListShoes.where((shoe) => shoe.branch == _selectedBranch).toList()
+        : Shoes.ListShoes;
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: Row(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            // Thêm logo (giả định đường dẫn)
+            Image.asset(
+              'assets/logo.png',
+              height: 40,
+              width: 40,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 10),
+            // Áp dụng kiểu chữ cho tiêu đề
+            Text(
+              widget.title,
+              style: const TextStyle(
+                fontFamily: 'MerriweatherSans',
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Column(
         children: [
-          Expanded(
-            flex: 1,
-            child: ListView.builder(
-              itemCount: (Shoes.ListShoes.length / 2).ceil(),
-              itemBuilder: (BuildContext context, int index) {
-                // 7
-                return GestureDetector(
-                  // 8
-                  onTap: () {
-                    // 9
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          // 10
-                          // TODO: Replace return with return RecipeDetail()
-                          return ShoesDetail(shoes: Shoes.ListShoes[index]);
+          // Hàng ngang các nút thương hiệu
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            color: Colors.white,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  // Nút "Tất cả" để hiển thị tất cả giày
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          _selectedBranch = null; // Xóa bộ lọc
+                        });
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: _selectedBranch == null ? Colors.black : Colors.grey),
+                        foregroundColor: _selectedBranch == null ? Colors.black : Colors.grey,
+                      ),
+                      child: const Text('Tất cả'),
+                    ),
+                  ),
+                  // Danh sách các nút thương hiệu
+                  ...Shoes.ListShoes.map((shoe) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedBranch = shoe.branch; // Lưu thương hiệu được chọn
+                          });
                         },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: _selectedBranch == shoe.branch ? Colors.black : Colors.grey),
+                          foregroundColor: _selectedBranch == shoe.branch ? Colors.black : Colors.grey,
+                        ),
+                        child: Text(
+                          shoe.branch.split('/').last.replaceAll('.png', '').replaceAll('.jpg', ''),
+                          style: const TextStyle(fontSize: 16, ),
+                        ),
                       ),
                     );
-                  },
-                  // 11
-                  child: buildShoesCard(Shoes.ListShoes[index]),
-                );
-              },
+                  }).toSet().toList(), // Loại bỏ các nút trùng lặp
+                ],
+              ),
             ),
           ),
+          // Danh sách giày với 2 cột (giữ nguyên như bạn cung cấp)
           Expanded(
-            flex: 1,
-            child: ListView.builder(
-              itemCount: (Shoes.ListShoes.length / 2).floor(),
-              itemBuilder: (BuildContext context, int index) {
-                int rightIndex = index + (Shoes.ListShoes.length / 2).ceil();
-                // 7
-                return GestureDetector(
-                  // 8
-                  onTap: () {
-                    // 9
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          // 10
-                          // TODO: Replace return with return RecipeDetail()
-                         return ShoesDetail(shoes: Shoes.ListShoes[rightIndex]);
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: ListView.builder(
+                    itemCount: (filteredShoes.length / 2).ceil(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ShoesDetail(shoes: filteredShoes[index]);
+                              },
+                            ),
+                          );
                         },
-                      ),
-                    );
-                  },
-                  // 11
-                  child: buildShoesCard(Shoes.ListShoes[rightIndex]),
-                );
-              },
+                        child: buildShoesCard(filteredShoes[index]),
+                      );
+                    },
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: ListView.builder(
+                    itemCount: (filteredShoes.length / 2).floor(),
+                    itemBuilder: (BuildContext context, int index) {
+                      int rightIndex = index + (filteredShoes.length / 2).ceil();
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ShoesDetail(
+                                  shoes: filteredShoes[rightIndex],
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        child: buildShoesCard(filteredShoes[rightIndex]),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
-}
 
-Widget buildShoesCard(Shoes shoes) {
-  return Card(
-    elevation: 2.0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: <Widget>[
-          Row(
-            children: [
-              Image.asset(shoes.branch, height: 30, width: 30),
-              Spacer(),
-              Image.asset(
-                shoes.star,
-                height: 20,
-                width: 20,
-                fit: BoxFit.contain,
-              ),
-            ],
-          ),
-          Image(image: AssetImage(shoes.imageUrl)),
-          const SizedBox(height: 10.0),
-          Text(
-            shoes.name,
-            style: const TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'MerriweatherSans',
+  Widget buildShoesCard(Shoes shoes) {
+    return Card(
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            Row(
+              children: [
+                Image.asset(shoes.branch, height: 30, width: 30),
+                Spacer(),
+                Image.asset(
+                  shoes.star,
+                  height: 20,
+                  width: 20,
+                  fit: BoxFit.contain,
+                ),
+              ],
             ),
-          ),
-           const SizedBox(height: 5.0),
+            Image(image: AssetImage(shoes.imageUrl)),
+            const SizedBox(height: 10.0),
             Text(
-            shoes.price,
-            style: const TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'MerriweatherSans',
+              shoes.name,
+              style: const TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'MerriweatherSans',
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 5.0),
+            Text(
+              shoes.price,
+              style: const TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'MerriweatherSans',
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

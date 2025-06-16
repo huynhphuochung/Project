@@ -12,7 +12,7 @@ class ShoesDetail extends StatefulWidget {
 
 class _ShoesDetailState extends State<ShoesDetail> {
   late Information_shoes _infoShoes;
-  int _selectedSize=0;
+  int _selectedSize = 0;
   @override
   void initState() {
     super.initState();
@@ -57,49 +57,111 @@ class _ShoesDetailState extends State<ShoesDetail> {
               ),
             ),
             const SizedBox(height: 5),
-            Text(
-              'Gía:${widget.shoes.price}',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 5),
-           
-           
-            const SizedBox(height: 5),
-             Text(
-              'Kích cỡ: ${_infoShoes.size[_selectedSize]}',
-              style: const TextStyle(fontSize: 16),
-            ),
-             const SizedBox(height: 5),
-            
-            Wrap(
-              spacing: 8.0,
-              children: List.generate(
-                _infoShoes.size.length,
-                (index) => ChoiceChip(
-                  label: Text(_infoShoes.size[index].toInt().toString()),
-                  selected: _selectedSize == index,
-                  selectedColor: Colors.orange[100], // Màu nền khi chọn
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                    side: BorderSide(
-                      color:
-                          _selectedSize == index ? Colors.orange : Colors.grey,
-                      width: 1,
-                    ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 16.0,
+                ), // Khoảng cách từ lề trái
+                child: Text(
+                  'Giá: ${widget.shoes.price}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
                   ),
-                  onSelected: (bool selected) {
-                    setState(() {
-                      _selectedSize = selected ? index : _selectedSize;
-                    });
-                  },
                 ),
               ),
             ),
-             const SizedBox(height: 5),
-            Text(
-              'Mô tả: ${_infoShoes.describe}',
-              style: const TextStyle(fontSize: 16),
+            const SizedBox(height: 5),
+
+            const SizedBox(height: 5),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 16.0,
+                ), // Khoảng cách từ lề trái
+              ),
             ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Chọn Size ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Wrap(
+                      spacing: 8.0,
+                      children: List.generate(
+                        _infoShoes.size.length,
+                        (index) => ChoiceChip(
+                          label: Text(
+                            _infoShoes.size[index].toInt().toString(),
+                          ),
+                          selected: _selectedSize == index,
+                          selectedColor: Colors.orange[100], // Màu nền khi chọn
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            side: BorderSide(
+                              color:
+                                  _selectedSize == index
+                                      ? Colors.orange
+                                      : Colors.grey,
+                              width: 1,
+                            ),
+                          ),
+                          onSelected: (bool selected) {
+                            setState(() {
+                              _selectedSize = selected ? index : _selectedSize;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 5),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Text(
+                  'Mô tả: ${_infoShoes.describe}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown[200], // Màu nền cho "Mua ngay"
+                  ),
+                  child: const Text('Mua ngay'),
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.green, // Màu nền cho "Thêm vào giỏ hàng"
+                  ),
+                  child: const Text('Thêm vào giỏ hàng'),
+                ),
+              ],
+            ),
+
             // TODO: Add Expanded
 
             // TODO: Add Slider() here
