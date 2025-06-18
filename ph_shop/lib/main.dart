@@ -42,19 +42,36 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String? _selectedBranch; // Biến để lưu thương hiệu được chọn
+  int _currentIndex = 0; // Chỉ số trang hiện tại
+  final PageController _pageController = PageController(); // Thêm PageController
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(() {
+      setState(() {
+        _currentIndex = _pageController.page?.round() ?? 0; // Cập nhật _currentIndex
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose(); // Giải phóng tài nguyên
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Lọc danh sách giày theo thương hiệu nếu _selectedBranch không null
     final filteredShoes = _selectedBranch != null
         ? Shoes.ListShoes.where((shoe) => shoe.branch == _selectedBranch).toList()
         : Shoes.ListShoes;
+    final uniqueBranches = Shoes.ListShoes.map((shoe) => shoe.branch).toSet().toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            // Thêm logo (giả định đường dẫn)
             Image.asset(
               'assets/logo.png',
               height: 40,
@@ -62,7 +79,6 @@ class _MyHomePageState extends State<MyHomePage> {
               fit: BoxFit.contain,
             ),
             const SizedBox(width: 10),
-            // Áp dụng kiểu chữ cho tiêu đề
             Text(
               widget.title,
               style: const TextStyle(
@@ -77,56 +93,130 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
-          // Hàng ngang các nút thương hiệu
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            color: Colors.white,
+            color: Colors.blueGrey[30],
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  // Nút "Tất cả" để hiển thị tất cả giày
                   Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedBranch = null; // Xóa bộ lọc
-                        });
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: _selectedBranch == null ? Colors.black : Colors.grey),
-                        foregroundColor: _selectedBranch == null ? Colors.black : Colors.grey,
-                      ),
-                      child: const Text('Tất cả'),
-                    ),
-                  ),
-                  // Danh sách các nút thương hiệu
-                  ...Shoes.ListShoes.map((shoe) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
+                    padding: const EdgeInsets.only(right: 30.0),
+                    child: SizedBox(
+                      width: 60,
+                      height: 60,
                       child: OutlinedButton(
                         onPressed: () {
                           setState(() {
-                            _selectedBranch = shoe.branch; // Lưu thương hiệu được chọn
+                            _selectedBranch = null;
                           });
                         },
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: _selectedBranch == shoe.branch ? Colors.black : Colors.grey),
-                          foregroundColor: _selectedBranch == shoe.branch ? Colors.black : Colors.grey,
+                          side: BorderSide(color: _selectedBranch == null ? Colors.black : Colors.grey),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          minimumSize: Size.zero,
+                          padding: EdgeInsets.zero,
                         ),
-                        child: Text(
-                          shoe.branch.split('/').last.replaceAll('.png', '').replaceAll('.jpg', ''),
-                          style: const TextStyle(fontSize: 16, ),
+                        child: Center(
+                          child: Text(
+                            'ALL',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  ...uniqueBranches.map((branch) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 30.0),
+                      child: SizedBox(
+                        width: 70,
+                        height: 60,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedBranch = branch;
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: _selectedBranch == branch ? Colors.black : Colors.grey),
+                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.white,
+                          ),
+                          child: Image.asset(
+                            branch,
+                            height: 60,
+                            width: 70,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     );
-                  }).toSet().toList(), // Loại bỏ các nút trùng lặp
+                  }).toList(),
                 ],
               ),
             ),
           ),
-          // Danh sách giày với 2 cột (giữ nguyên như bạn cung cấp)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            color: Colors.white,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 200.0,
+                  child: PageView.builder(
+                    controller: _pageController, // Sử dụng PageController
+                    itemCount: filteredShoes.length,
+                    itemBuilder: (context, index) {
+                      final shoe = filteredShoes[index];
+                      return Container(
+                        width: MediaQuery.of(context).size.width,
+                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ShoesDetail(shoes: shoe),
+                              ),
+                            );
+                          },
+                          child: Image.asset(
+                            shoe.imageUrl,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: filteredShoes.map((shoe) {
+                    int index = filteredShoes.indexOf(shoe);
+                    return Container(
+                      width: 8.0,
+                      height: 8.0,
+                      margin: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 10.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _currentIndex == index ? Colors.black : Colors.grey,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: Row(
               children: [
@@ -163,9 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) {
-                                return ShoesDetail(
-                                  shoes: filteredShoes[rightIndex],
-                                );
+                                return ShoesDetail(shoes: filteredShoes[rightIndex]);
                               },
                             ),
                           );
