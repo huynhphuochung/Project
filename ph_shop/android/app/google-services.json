@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1080232102484",
+    "project_id": "phonic-silo-438215-f3",
+    "storage_bucket": "phonic-silo-438215-f3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1080232102484:android:c895be47b5b826e5487bc1",
+        "android_client_info": {
+          "package_name": "com.example.ph_shop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfBqxeVUJIAxOzxDBh5CvTiFVJ4H0hOpk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
