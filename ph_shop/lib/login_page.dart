@@ -58,10 +58,8 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     String password = _passwordController.text.trim();
 
     try {
-      var userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      var userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
 
       if (mounted) {
         Navigator.pushReplacement(
@@ -84,16 +82,17 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
 
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Đăng nhập thất bại'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+        builder:
+            (_) => AlertDialog(
+              title: const Text('Đăng nhập thất bại'),
+              content: Text(message),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     }
   }
@@ -102,7 +101,15 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(title: const Text('Đăng nhập')),
+      appBar: AppBar(
+        title: const Text('Đăng nhập'),
+        leading: IconButton(
+         icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
@@ -169,7 +176,9 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                   labelText: 'Mật khẩu',
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                     ),
                     onPressed: () {
                       setState(() {

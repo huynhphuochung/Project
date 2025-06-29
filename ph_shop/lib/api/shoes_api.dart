@@ -1,0 +1,20 @@
+// lib/api/shoes_api.dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../shoes.dart'; // import model giày
+
+Future<List<Shoes>> fetchShoes() async {
+  final response = await http.get(Uri.parse('http://192.168.1.21/php_backend_api/shoes/get_shoes.php'));
+
+  if (response.statusCode == 200) {
+    final jsonData = json.decode(response.body);
+    if (jsonData['success']) {
+      List<dynamic> data = jsonData['data'];
+      return data.map((item) => Shoes.fromJson(item)).toList();
+    } else {
+      throw Exception("Không có dữ liệu giày");
+    }
+  } else {
+    throw Exception("Lỗi kết nối đến server");
+  }
+}

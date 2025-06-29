@@ -24,7 +24,7 @@ class _SuccessPageState extends State<SuccessPage> {
         timer.cancel();
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const ph_shop()),
+          MaterialPageRoute(builder: (context) => const PHShop()),
           (route) => false,
         );
       } else {
