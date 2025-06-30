@@ -46,7 +46,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String? _selectedType;
+  String? _selected_user_Gender;
   int _currentIndex = 0;
   final PageController _pageController = PageController();
   List<Shoes> shoesList = [];
@@ -58,7 +58,12 @@ class _MyHomePageState extends State<MyHomePage> {
     'image3.png',
   ];
 
-  final List<String> types = ['ALL', 'Giày thể thao', 'Giày tây', 'Giày trẻ em'];
+  final List<String> types = ['ALL', 'MEN', 'WOMEN'];
+  final Map<String, String?> genderFilters = {
+    'ALL': null,
+    'MEN': 'Nam',
+    'WOMEN': 'Nữ',
+  };
 
   @override
   void initState() {
@@ -85,14 +90,15 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final filteredShoes = _selectedType == null || _selectedType == 'ALL'
-        ? shoesList
-        : shoesList.where((shoe) => shoe.type_shoe == _selectedType).toList();
+    final filteredShoes =
+        _selected_user_Gender == null || _selected_user_Gender == 'ALL'
+            ? shoesList
+            : shoesList
+                .where((shoe) => shoe.user_gender == _selected_user_Gender)
+                .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -102,13 +108,15 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Image.asset('assets/logo.png', height: 40, width: 40),
             const SizedBox(width: 10),
-            Text(widget.title,
-                style: const TextStyle(
-                  fontFamily: 'MerriweatherSans',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                )),
+            Text(
+              widget.title,
+              style: const TextStyle(
+                fontFamily: 'MerriweatherSans',
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -123,9 +131,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 tooltip: user == null ? 'Đăng nhập' : 'Tài khoản',
                 onPressed: () {
                   if (user == null) {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                    );
                   } else {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountPage()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AccountPage()),
+                    );
                   }
                 },
               );
@@ -136,34 +150,64 @@ class _MyHomePageState extends State<MyHomePage> {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              color: Colors.blueGrey[50],
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: types.map((type) {
-                    final bool isSelected = _selectedType == type || (_selectedType == null && type == 'ALL');
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: OutlinedButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedType = type == 'ALL' ? null : type;
-                          });
-                        },
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: isSelected ? Colors.black : Colors.white,
-                          foregroundColor: isSelected ? Colors.white : Colors.black,
-                        ),
-                        child: Text(type, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                    );
-                  }).toList(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TextField(
+                enabled: false, // ⛔ Không cho nhập, chỉ là giao diện
+                decoration: InputDecoration(
+                  hintText: 'Tìm kiếm sản phẩm...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
             ),
           ),
+
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              color: Colors.white,
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 10,
+                alignment: WrapAlignment.center,
+                children:
+                    genderFilters.entries.map((entry) {
+                      final String label = entry.key; // 'MEN'
+                      final String? genderValue = entry.value; // 'Nam'
+                      final bool isSelected =
+                          _selected_user_Gender == genderValue;
+
+                      return SizedBox(
+                        width: (MediaQuery.of(context).size.width - 64) / 3,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              _selected_user_Gender = genderValue;
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor:
+                                isSelected ? Colors.black : Colors.white,
+                            foregroundColor:
+                                isSelected ? Colors.white : Colors.black,
+                          ),
+                          child: Text(
+                            label,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+              ),
+            ),
+          ),
+
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -178,7 +222,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       itemBuilder: (context, index) {
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
-                          child: Image.asset('assets/pageview/${pageViewImages[index]}', fit: BoxFit.cover),
+                          child: Image.asset(
+                            'assets/pageview/${pageViewImages[index]}',
+                            fit: BoxFit.cover,
+                          ),
                         );
                       },
                     ),
@@ -189,10 +236,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       return Container(
                         width: 8,
                         height: 8,
-                        margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 2,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _currentIndex == index ? Colors.black : Colors.grey,
+                          color:
+                              _currentIndex == index
+                                  ? Colors.black
+                                  : Colors.grey,
                         ),
                       );
                     }),
@@ -201,6 +254,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
+
           SliverPadding(
             padding: const EdgeInsets.all(8.0),
             sliver: SliverGrid(
@@ -210,13 +264,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSpacing: 8,
                 childAspectRatio: 0.65,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final shoe = filteredShoes[index];
-                  return buildShoesCard(shoe);
-                },
-                childCount: filteredShoes.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final shoe = filteredShoes[index];
+                return buildShoesCard(shoe);
+              }, childCount: filteredShoes.length),
             ),
           ),
         ],
@@ -234,12 +285,21 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Row(
               children: [
-                Text(shoes.id_shoe, style: const TextStyle(fontSize: 12)),
+                Image.asset('assets/logo.png', width: 40, height: 40),
                 const Spacer(),
-                Image.asset(shoes.star, height: 20, width: 20),
+                Text(
+                  shoes.star,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Padding(padding: EdgeInsets.only(right: 5)),
+                Image.asset('assets/star.png', width: 20, height: 20),
               ],
             ),
             const SizedBox(height: 4),
+
             Expanded(
               child: Image.network(
                 shoes.image,
@@ -248,7 +308,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(shoes.name_shoe, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(
+              shoes.name_shoe,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
             Text(shoes.price, style: const TextStyle(fontSize: 16)),
           ],
         ),

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../shoes.dart'; // import model giày
 
 Future<List<Shoes>> fetchShoes() async {
-  final response = await http.get(Uri.parse('http://192.168.1.21/php_backend_api/shoes/get_shoes.php'));
+  final response = await http.get(Uri.parse('http://192.168.1.202/php_backend_api/shoes/get_shoes.php'));
 
   if (response.statusCode == 200) {
     final jsonData = json.decode(response.body);
