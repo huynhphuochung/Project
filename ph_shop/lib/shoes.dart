@@ -29,3 +29,16 @@ class Shoes {
     );
   }
 }
+class ShoeSize {
+  final int size;
+  final int quantity;
+
+  ShoeSize({required this.size, required this.quantity});
+
+  factory ShoeSize.fromJson(Map<String, dynamic> json) {
+    return ShoeSize(
+      size: int.parse(json['size'].toString()),
+      quantity: int.parse(json['quantity'].toString()),
+    );
+  }
+}

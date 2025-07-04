@@ -5,7 +5,9 @@ import 'login_page.dart';
 import 'account_page.dart';
 import 'shoes.dart';
 import '../api/shoes_api.dart';
-
+import '../api/base_url.dart';
+import 'shoes_detail.dart';
+import 'cart.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -120,6 +122,17 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart, color: Colors.black),
+            tooltip: 'Giỏ hàng',
+            onPressed: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => const CartPage()),
+  );
+},
+
+          ),
           Builder(
             builder: (context) {
               final user = FirebaseAuth.instance.currentUser;
@@ -276,46 +289,56 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget buildShoesCard(Shoes shoes) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Image.asset('assets/logo.png', width: 40, height: 40),
-                const Spacer(),
-                Text(
-                  shoes.star,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ShoesDetail(shoes: shoes)),
+        );
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Image.asset('assets/logo.png', width: 40, height: 40),
+                  const Spacer(),
+                  Text(
+                    shoes.star,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                Padding(padding: EdgeInsets.only(right: 5)),
-                Image.asset('assets/star.png', width: 20, height: 20),
-              ],
-            ),
-            const SizedBox(height: 4),
-
-            Expanded(
-              child: Image.network(
-                shoes.image,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+                  const Padding(padding: EdgeInsets.only(right: 5)),
+                  Image.asset('assets/star.png', width: 20, height: 20),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              shoes.name_shoe,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(shoes.price, style: const TextStyle(fontSize: 16)),
-          ],
+              const SizedBox(height: 4),
+              Expanded(
+                child: Image.network(
+                  '$baseUrl/image/${shoes.image}',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                shoes.name_shoe,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(shoes.price, style: const TextStyle(fontSize: 16)),
+            ],
+          ),
         ),
       ),
     );

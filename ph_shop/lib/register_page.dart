@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../api/new_user_api.dart'; // <-- file chứa hàm insertUserToMySQL
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -27,11 +28,17 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      // Thành công
+      // Đăng ký Firebase
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      User? user = userCredential.user;
+
+      // Gửi uid + email về MySQL (name = "")
+      if (user != null) {
+        await insertUserToMySQL(user.uid, user.email!, "");
+      }
+
       if (mounted) {
         Navigator.pop(context); // quay về trang đăng nhập
       }
