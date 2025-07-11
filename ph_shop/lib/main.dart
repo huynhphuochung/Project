@@ -8,6 +8,7 @@ import '../api/shoes_api.dart';
 import '../api/base_url.dart';
 import 'shoes_detail.dart';
 import 'cart.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -29,8 +30,8 @@ class PHShop extends StatelessWidget {
           surface: Colors.white,
         ),
         scaffoldBackgroundColor: Colors.blueGrey[50],
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue[100],
           foregroundColor: Colors.black,
         ),
       ),
@@ -104,7 +105,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         title: Row(
           children: [
@@ -122,43 +122,69 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart, color: Colors.black),
-            tooltip: 'Giỏ hàng',
-            onPressed: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const CartPage()),
-  );
-},
+  // Giỏ hàng
+  Padding(
+    padding: const EdgeInsets.only(right: 12),
+    child: GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CartPage()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+        ),
+        child: const Icon(
+          Icons.shopping_cart,
+          color: Colors.black,
+          size: 24,
+        ),
+      ),
+    ),
+  ),
 
-          ),
-          Builder(
-            builder: (context) {
-              final user = FirebaseAuth.instance.currentUser;
-              return IconButton(
-                icon: Icon(
-                  user == null ? Icons.login : Icons.account_circle,
-                  color: Colors.black,
-                ),
-                tooltip: user == null ? 'Đăng nhập' : 'Tài khoản',
-                onPressed: () {
-                  if (user == null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginPage()),
-                    );
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AccountPage()),
-                    );
-                  }
-                },
+  // Đăng nhập hoặc tài khoản
+  Padding(
+    padding: const EdgeInsets.only(right: 12),
+    child: Builder(
+      builder: (context) {
+        final user = FirebaseAuth.instance.currentUser;
+        return GestureDetector(
+          onTap: () {
+            if (user == null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()),
               );
-            },
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AccountPage()),
+              );
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+            ),
+            child: Icon(
+              user == null ? Icons.login : Icons.person,
+              color: Colors.black,
+              size: 24,
+            ),
           ),
-        ],
+        );
+      },
+    ),
+  ),
+],
+
       ),
       body: CustomScrollView(
         slivers: [
@@ -168,10 +194,10 @@ class _MyHomePageState extends State<MyHomePage> {
               child: TextField(
                 enabled: false, // ⛔ Không cho nhập, chỉ là giao diện
                 decoration: InputDecoration(
-                  hintText: 'Tìm kiếm sản phẩm...',
+                  hintText: 'Looking for shoes',
                   prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   filled: true,
                   fillColor: Colors.white,
@@ -205,9 +231,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           style: OutlinedButton.styleFrom(
                             backgroundColor:
-                                isSelected ? Colors.black : Colors.white,
+                                isSelected ? Colors.blue[300] : Colors.white,
                             foregroundColor:
                                 isSelected ? Colors.white : Colors.black,
+                                 side: BorderSide.none,
                           ),
                           child: Text(
                             label,
@@ -263,6 +290,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
                     }),
                   ),
+
+
+
+
+                  
                 ],
               ),
             ),
@@ -297,6 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       },
       child: Card(
+        color: Colors.blue[50],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 2,
         child: Padding(
@@ -307,15 +340,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   Image.asset('assets/logo.png', width: 40, height: 40),
                   const Spacer(),
-                  Text(
-                    shoes.star,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[400], // 🎨 màu nền khung sao
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          shoes.star,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Image.asset('assets/star.png', width: 16, height: 16),
+                      ],
                     ),
                   ),
-                  const Padding(padding: EdgeInsets.only(right: 5)),
-                  Image.asset('assets/star.png', width: 20, height: 20),
                 ],
               ),
               const SizedBox(height: 4),
@@ -327,16 +375,49 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                shoes.name_shoe,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 🟥 Khung tên giày (trên)
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      shoes.name_shoe,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // 🟩 Khung giá giày (dưới)
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '\$${shoes.price}',
+                      style:  TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.orange[400],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Text(shoes.price, style: const TextStyle(fontSize: 16)),
             ],
           ),
         ),

@@ -42,3 +42,22 @@ class ShoeSize {
     );
   }
 }
+class ShoeColor {
+  final int idColor; // <-- là int, không phải String
+  final String imageUrl;
+  final String colorName;
+
+  ShoeColor({
+    required this.idColor,
+    required this.imageUrl,
+    required this.colorName,
+  });
+
+  factory ShoeColor.fromJson(Map<String, dynamic> json) {
+    return ShoeColor(
+      idColor: json['id_color'], // đúng kiểu
+      imageUrl: json['image_url'],
+      colorName: json['color_name'],
+    );
+  }
+}

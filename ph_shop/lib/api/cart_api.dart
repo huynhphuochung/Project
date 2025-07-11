@@ -6,6 +6,7 @@ Future<void> addToCart({
   required String shoeId,
   required String size,
   int quantity = 1,
+   required String image, 
 }) async {
   try {
     final response = await http.post(
@@ -15,6 +16,7 @@ Future<void> addToCart({
         'shoe_id': shoeId.toString(),
         'size': size,
         'quantity': quantity.toString(),
+         'image': image,
       },
     );
 

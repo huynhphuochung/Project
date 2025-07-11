@@ -4,7 +4,7 @@ class CartItem {
   final String name;
   final String image;
   final double price;
-  final int quantity;
+   int quantity;
   final String size;
 
   CartItem({
@@ -18,14 +18,14 @@ class CartItem {
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
-  return CartItem(
-    id: int.parse(json['id'].toString()),
-    shoeId: json['shoe_id'].toString(),
-    name: json['name'].toString(),
-    image: json['image'].toString(),
-    price: double.parse(json['price'].toString()),
-    quantity: int.parse(json['quantity'].toString()),
-    size: json['size'].toString(),
-  );
-}
+    return CartItem(
+      id: json['id'],
+      shoeId: json['shoe_id'],
+      name: json['name'],
+      image: json['image'], // 👈 đây là hình theo màu
+      price: double.parse(json['price'].toString()),
+      quantity: json['quantity'],
+      size: json['size'],
+    );
+  }
 }
