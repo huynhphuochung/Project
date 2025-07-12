@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'main.dart'; // gọi đến ph_shop()
+import 'main.dart'; 
 import 'dart:async';
 
 class SuccessPage extends StatefulWidget {

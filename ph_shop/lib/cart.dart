@@ -6,7 +6,7 @@ import '../api/get_card_api.dart';
 import '../api/base_url.dart';
 import '../api/delete_cart_api.dart';
 import 'api/update_cart_api.dart';
-
+import 'check_out.dart';
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
 
@@ -282,11 +282,27 @@ class _CartPageState extends State<CartPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('🔔 Chưa xử lý thanh toán')),
-                );
-              },
+              onPressed: () async {
+  if (futureCart != null) {
+    final cartItems = await futureCart;
+    if (cartItems != null && cartItems.isNotEmpty) {
+      final total = cartItems.fold(
+        0.0,
+        (sum, item) => sum + item.price * item.quantity,
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CheckoutPage(
+            cartItems: cartItems,
+            totalAmount: total,
+          ),
+        ),
+      );
+    }
+  }
+},
+
               child: const Text(
                 'Checkout',
                 style: TextStyle(fontSize: 16, color: Colors.white),

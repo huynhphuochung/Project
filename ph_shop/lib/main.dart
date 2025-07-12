@@ -43,7 +43,6 @@ class PHShop extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
-  
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -55,7 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final PageController _pageController = PageController();
   List<Shoes> shoesList = [];
   bool isLoading = true;
-String searchQuery = '';
+  String searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   final List<String> pageViewImages = [
     'image1.png',
@@ -90,6 +90,7 @@ String searchQuery = '';
   void dispose() {
     _pageController.dispose();
     super.dispose();
+     _searchController.dispose();
   }
 
   @override
@@ -99,11 +100,16 @@ String searchQuery = '';
     }
 
     final filteredShoes =
-        _selected_user_Gender == null || _selected_user_Gender == 'ALL'
-            ? shoesList
-            : shoesList
-                .where((shoe) => shoe.user_gender == _selected_user_Gender)
-                .toList();
+        shoesList.where((shoe) {
+          final matchesGender =
+              _selected_user_Gender == null || _selected_user_Gender == 'ALL'
+                  ? true
+                  : shoe.user_gender == _selected_user_Gender;
+          final matchesSearch = shoe.name_shoe.toLowerCase().contains(
+            searchQuery,
+          );
+          return matchesGender && matchesSearch;
+        }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -124,69 +130,68 @@ String searchQuery = '';
           ],
         ),
         actions: [
-  // Giỏ hàng
-  Padding(
-    padding: const EdgeInsets.only(right: 12),
-    child: GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const CartPage()),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-        ),
-        child: const Icon(
-          Icons.shopping_cart,
-          color: Colors.black,
-          size: 24,
-        ),
-      ),
-    ),
-  ),
-
-  // Đăng nhập hoặc tài khoản
-  Padding(
-    padding: const EdgeInsets.only(right: 12),
-    child: Builder(
-      builder: (context) {
-        final user = FirebaseAuth.instance.currentUser;
-        return GestureDetector(
-          onTap: () {
-            if (user == null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginPage()),
-              );
-            } else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AccountPage()),
-              );
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-            ),
-            child: Icon(
-              user == null ? Icons.login : Icons.person,
-              color: Colors.black,
-              size: 24,
+          // Giỏ hàng
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CartPage()),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: const Icon(
+                  Icons.shopping_cart,
+                  color: Colors.black,
+                  size: 24,
+                ),
+              ),
             ),
           ),
-        );
-      },
-    ),
-  ),
-],
 
+          // Đăng nhập hoặc tài khoản
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Builder(
+              builder: (context) {
+                final user = FirebaseAuth.instance.currentUser;
+                return GestureDetector(
+                  onTap: () {
+                    if (user == null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AccountPage()),
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: Icon(
+                      user == null ? Icons.login : Icons.person,
+                      color: Colors.black,
+                      size: 24,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       body: CustomScrollView(
         slivers: [
@@ -194,10 +199,27 @@ String searchQuery = '';
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: TextField(
-                enabled: false, // ⛔ Không cho nhập, chỉ là giao diện
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.toLowerCase();
+                  });
+                },
                 decoration: InputDecoration(
                   hintText: 'Looking for shoes',
                   prefixIcon: Icon(Icons.search),
+                  suffixIcon:
+                      searchQuery.isNotEmpty
+                          ? IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                searchQuery = '';
+                              });
+                            },
+                          )
+                          : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -236,7 +258,7 @@ String searchQuery = '';
                                 isSelected ? Colors.blue[300] : Colors.white,
                             foregroundColor:
                                 isSelected ? Colors.white : Colors.black,
-                                 side: BorderSide.none,
+                            side: BorderSide.none,
                           ),
                           child: Text(
                             label,
@@ -292,11 +314,6 @@ String searchQuery = '';
                       );
                     }),
                   ),
-
-
-
-
-                  
                 ],
               ),
             ),
@@ -411,7 +428,7 @@ String searchQuery = '';
                     ),
                     child: Text(
                       '\$${shoes.price}',
-                      style:  TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.orange[400],

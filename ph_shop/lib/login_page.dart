@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'home_page.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
+import '../api/base_url.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,10 +18,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
-
   bool _hideLogo = false;
   bool _obscurePassword = true;
 
@@ -53,6 +55,17 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _saveTokenToServer(String uid, String token) async {
+    final response = await http.post(
+      Uri.parse('${baseUrl}user/save_fcm_token.php'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': uid, 'token': token}),
+    );
+
+    final data = jsonDecode(response.body);
+    debugPrint('📡 Lưu token: ${data['message']}');
+  }
+
   void _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -60,6 +73,16 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     try {
       var userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+
+      final uid = userCredential.user?.uid;
+
+      // 🔔 Lấy FCM token
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+
+      // 🔁 Gửi token lên server
+      if (uid != null && fcmToken != null) {
+        await _saveTokenToServer(uid, fcmToken);
+      }
 
       if (mounted) {
         Navigator.pushReplacement(
@@ -82,17 +105,16 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
 
       showDialog(
         context: context,
-        builder:
-            (_) => AlertDialog(
-              title: const Text('Đăng nhập thất bại'),
-              content: Text(message),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
-                ),
-              ],
+        builder: (_) => AlertDialog(
+          title: const Text('Đăng nhập thất bại'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
             ),
+          ],
+        ),
       );
     }
   }
@@ -105,9 +127,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
         title: const Text('Đăng nhập'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: GestureDetector(
@@ -138,7 +158,6 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                           border: Border.all(color: Colors.black, width: 2),
                           color: Colors.transparent,
                         ),
-
                         child: Image.asset(
                           'assets/logo.png',
                           height: 90,
@@ -149,9 +168,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                       const SizedBox(height: 20),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
+                            horizontal: 20, vertical: 10),
                         decoration: BoxDecoration(
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(20),
@@ -166,7 +183,6 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 40),
                     ],
                   ),
@@ -215,13 +231,12 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                   ),
                 ),
               ),
-
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, // Màu nền
+                    backgroundColor: Colors.blue,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -234,7 +249,6 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
               Align(
                 alignment: Alignment.centerRight,
