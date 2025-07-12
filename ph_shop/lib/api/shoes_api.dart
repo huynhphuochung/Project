@@ -18,3 +18,14 @@ Future<List<Shoes>> fetchShoes() async {
     throw Exception("Lỗi kết nối đến server");
   }
 }
+Future<List<Shoes>> searchShoes(String keyword) async {
+  final response = await http.get(Uri.parse('$baseUrl/shoes/search_shoes.php?keyword=$keyword'));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return data.map<Shoes>((json) => Shoes.fromJson(json)).toList();
+  } else {
+    throw Exception('Failed to search shoes');
+  }
+}
+

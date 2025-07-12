@@ -104,7 +104,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
       appBar: AppBar(
         title: const Text('Đăng nhập'),
         leading: IconButton(
-         icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -138,24 +138,35 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                           border: Border.all(color: Colors.black, width: 2),
                           color: Colors.transparent,
                         ),
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/logo.png',
-                            height: 90,
-                            width: 90,
-                            fit: BoxFit.cover,
-                          ),
+
+                        child: Image.asset(
+                          'assets/logo.png',
+                          height: 90,
+                          width: 90,
+                          fit: BoxFit.cover,
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const Text(
-                        'ĐĂNG NHẬP',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'MerriweatherSans',
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'PH SHOP',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'MerriweatherSans',
+                          ),
                         ),
                       ),
+
                       const SizedBox(height: 40),
                     ],
                   ),
@@ -164,7 +175,16 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
               TextField(
                 controller: _emailController,
                 focusNode: _emailFocus,
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
+                ),
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
@@ -174,6 +194,13 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Mật khẩu',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -188,14 +215,26 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                   ),
                 ),
               ),
+
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // Màu nền
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   onPressed: _login,
-                  child: const Text('Đăng nhập'),
+                  child: const Text(
+                    'Login',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ),
               ),
+
               const SizedBox(height: 20),
               Align(
                 alignment: Alignment.centerRight,

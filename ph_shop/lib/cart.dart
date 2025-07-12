@@ -4,7 +4,8 @@ import '../api/user_id_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../api/get_card_api.dart';
 import '../api/base_url.dart';
-import '../api/delete_cart_api.dart'; // thêm đầu file
+import '../api/delete_cart_api.dart';
+import 'api/update_cart_api.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -14,7 +15,7 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  Future<List<CartItem>>? futureCart; // Thay vì late
+  Future<List<CartItem>>? futureCart;
 
   Future<int?> getCurrentUserId() async {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -127,19 +128,33 @@ class _CartPageState extends State<CartPage> {
                                   fontSize: 16,
                                 ),
                               ),
-                              Text('Size: ${item.size}'),
+                              Text(
+                                'Size: ${item.size}',
+                                style: TextStyle(
+                                  foreground:
+                                      Paint()..color = Colors.blue,
+                                ),
+                              ),
                               Row(
                                 children: [
                                   IconButton(
                                     icon: const Icon(
                                       Icons.remove_circle,
-                                      color: Colors.white,
+                                      color: Colors.grey,
                                     ),
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (item.quantity > 1) {
-                                        setState(() {
-                                          item.quantity--;
-                                        });
+                                        final newQuantity = item.quantity - 1;
+                                        final success =
+                                            await updateCartQuantity(
+                                              item.id,
+                                              newQuantity,
+                                            );
+                                        if (success) {
+                                          setState(() {
+                                            item.quantity = newQuantity;
+                                          });
+                                        }
                                       }
                                     },
                                   ),
@@ -154,10 +169,17 @@ class _CartPageState extends State<CartPage> {
                                       Icons.add_circle,
                                       color: Colors.blue,
                                     ),
-                                    onPressed: () {
-                                      setState(() {
-                                        item.quantity++;
-                                      });
+                                    onPressed: () async {
+                                      final newQuantity = item.quantity + 1;
+                                      final success = await updateCartQuantity(
+                                        item.id,
+                                        newQuantity,
+                                      );
+                                      if (success) {
+                                        setState(() {
+                                          item.quantity = newQuantity;
+                                        });
+                                      }
                                     },
                                   ),
                                 ],
@@ -174,9 +196,12 @@ class _CartPageState extends State<CartPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 20,),
+                            const SizedBox(height: 20),
                             IconButton(
-                              icon: const Icon(Icons.delete_forever, color: Colors.red),
+                              icon: const Icon(
+                                Icons.delete_forever,
+                                color: Colors.red,
+                              ),
                               onPressed: () async {
                                 final success = await deleteCartItem(item.id);
                                 if (success) {
@@ -194,13 +219,81 @@ class _CartPageState extends State<CartPage> {
                       ],
                     ),
                   ),
-
-                   // Dòng ngang
                 ],
               );
             },
           );
         },
+      ),
+
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Tổng cộng:',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                FutureBuilder<List<CartItem>>(
+                  future: futureCart,
+                  builder: (context, snapshot) {
+                    double total = 0;
+                    if (snapshot.hasData) {
+                      total = snapshot.data!.fold(
+                        0,
+                        (sum, item) => sum + item.price * item.quantity,
+                      );
+                    }
+                    return Text(
+                      '\$${total.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('🔔 Chưa xử lý thanh toán')),
+                );
+              },
+              child: const Text(
+                'Checkout',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
