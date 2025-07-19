@@ -27,11 +27,14 @@ class _ShoesDetailState extends State<ShoesDetail> {
   @override
   void initState() {
     super.initState();
-    fetchShoeSizes(widget.shoes.id_shoe).then((value) {
-      setState(() {
-        sizes = value;
-      });
+   if (selectedColor != null) {
+  fetchShoeSizes(widget.shoes.id_shoe, selectedColor!.idColor).then((sizesList) {
+    setState(() {
+      sizes = sizesList;
     });
+  });
+}
+
     fetchShoeColors(widget.shoes.id_shoe).then((value) {
       setState(() {
         colors = value;
@@ -180,8 +183,20 @@ class _ShoesDetailState extends State<ShoesDetail> {
                           onTap: () {
                             setState(() {
                               selectedColor = color;
+                              selectedSizeValue = null; // reset size
+                              sizes = [];
+                            });
+
+                            fetchShoeSizes(
+                              widget.shoes.id_shoe,
+                              color.idColor,
+                            ).then((value) {
+                              setState(() {
+                                sizes = value;
+                              });
                             });
                           },
+
                           child: Container(
                             width: 60,
                             height: 60,
@@ -383,15 +398,15 @@ class _ShoesDetailState extends State<ShoesDetail> {
 
                         final idUser = await getUserIdFromUid(currentUser.uid);
                         if (idUser != null) {
-                         await addToCart(
-  idUser: idUser,
-  shoeId: widget.shoes.id_shoe,
-  size: selectedSizeValue!,
-  quantity: selectedQuantity,
-  image: selectedColor?.imageUrl ?? widget.shoes.image,
- // 👈 hình ảnh màu sắc đã chọn
-);
-
+                          await addToCart(
+                            idUser: idUser,
+                            shoeId: widget.shoes.id_shoe,
+                            size: selectedSizeValue!,
+                            quantity: selectedQuantity,
+                            image:
+                                selectedColor?.imageUrl ?? widget.shoes.image,
+                            colorId: selectedColor?.idColor, // ✅ thêm dòng này
+                          );
 
                           showDialog(
                             context: context,

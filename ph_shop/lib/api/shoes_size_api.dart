@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import '../shoes.dart';
 import 'base_url.dart';
 
-Future<List<ShoeSize>> fetchShoeSizes(String shoeId) async {
-  final response = await http.get(Uri.parse('$baseUrl/shoes/get_sizes.php?shoe_id=$shoeId'));
+Future<List<ShoeSize>> fetchShoeSizes(String shoeId, int colorId) async {
+  final response = await http.get(Uri.parse('$baseUrl/shoes/get_sizes.php?shoe_id=$shoeId&color_id=$colorId'));
 
   if (response.statusCode == 200) {
     final jsonData = json.decode(response.body);

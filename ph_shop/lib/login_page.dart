@@ -79,6 +79,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
       // 🔔 Lấy FCM token
       final fcmToken = await FirebaseMessaging.instance.getToken();
 
+
       // 🔁 Gửi token lên server
       if (uid != null && fcmToken != null) {
         await _saveTokenToServer(uid, fcmToken);

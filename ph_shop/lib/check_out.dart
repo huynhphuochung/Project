@@ -5,7 +5,7 @@ import '../api/base_url.dart';
 import '../api/user_id_api.dart';
 import 'cart_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'my_orders_page.dart'; // Đường dẫn tới file chứa MyOrdersPage
+import 'my_orders_page.dart';
 
 class CheckoutPage extends StatefulWidget {
   final List<CartItem> cartItems;
@@ -36,73 +36,60 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
 
     final userId = await getUserIdFromUid(currentUser.uid);
-final orderData = {
-  'user_id': userId,
-  'address': addressController.text,
-  'phone': phoneController.text,
-  'payment_method': paymentMethod,
-  'items': widget.cartItems.map((item) => {
-    'shoe_id': item.shoeId,
-    'size': item.size,
-    'quantity': item.quantity,
-    'price': item.price,
-  }).toList(),
-};
-
-print('🟢 JSON gửi lên server:');
-print(jsonEncode(orderData));
+    final orderItems =
+        widget.cartItems
+            .map(
+              (item) => {
+                'shoe_id': item.shoeId,
+                'size': item.size,
+                'quantity': item.quantity,
+                'price': item.price,
+                'color_id': item.colorId,
+              },
+            )
+            .toList();
 
     final response = await http.post(
       Uri.parse('${baseUrl}orders/create_order.php'),
-
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': userId,
         'address': addressController.text,
         'phone': phoneController.text,
         'payment_method': paymentMethod,
-        'items':
-            widget.cartItems
-                .map(
-                  (item) => {
-                    'shoe_id': item.shoeId,
-                    'size': item.size,
-                    'quantity': item.quantity,
-                    'price': item.price,
-                  },
-                )
-                .toList(),
+        'items': orderItems,
+        'total_amount': widget.totalAmount,
       }),
     );
 
-    print('RESPONSE STATUS: ${response.statusCode}');
-    print('RESPONSE BODY: ${response.body}');
-print('RESPONSE BODY BEFORE DECODE:\n${response.body}');
+    final result = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
-      print("STATUS CODE: ${response.statusCode}");
-      print("BODY:\n${response.body}");
-      print('STATUS: ${response.statusCode}');
-      print('RESPONSE BODY: ${response.body}');
-      final result = jsonDecode(response.body);
-      if (result['status'] == 'success') {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('✅ ${result['message']}')));
-        Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (_) => const MyOrdersPage()),
-);
-
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('❌ ${result['message']}')));
+    if (response.statusCode == 200 &&
+        (result['success'] == true || result['status'] == 'success')) {
+      for (var item in widget.cartItems) {
+        await http.post(
+          Uri.parse('${baseUrl}orders/update_quantity.php'),
+          body: {
+            'shoe_id': item.shoeId,
+            'color_id': item.colorId.toString(),
+            'size': item.size.toString(),
+            'quantity': item.quantity.toString(),
+          },
+        );
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Lỗi server: ${response.statusCode}')),
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('✅ ${result['message']}')));
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MyOrdersPage()),
       );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('❌ ${result['message']}')));
     }
   }
 
@@ -197,7 +184,6 @@ print('RESPONSE BODY BEFORE DECODE:\n${response.body}');
                   );
                   return;
                 }
-
                 placeOrder();
               },
               child: Text(

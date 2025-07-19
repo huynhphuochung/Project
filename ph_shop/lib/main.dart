@@ -8,11 +8,40 @@ import '../api/shoes_api.dart';
 import '../api/base_url.dart';
 import 'shoes_detail.dart';
 import 'cart.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'my_orders_page.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+  // Background message handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Local notifications init
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
   runApp(const PHShop());
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // Optional: print(message.data); nếu muốn debug
 }
 
 class PHShop extends StatelessWidget {
@@ -84,13 +113,36 @@ class _MyHomePageState extends State<MyHomePage> {
         _currentIndex = _pageController.page?.round() ?? 0;
       });
     });
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'ph_channel', // ID channel
+              'PH Notifications', // Tên channel
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
+          ),
+        );
+      }
+    });
+    FirebaseMessaging.instance.getToken().then((token) {
+      print('🔥 FCM Token: $token');
+    });
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
-     _searchController.dispose();
+    _searchController.dispose();
   }
 
   @override
@@ -148,6 +200,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 child: const Icon(
                   Icons.shopping_cart,
+                  color: Colors.black,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+          // Icon đơn hàng
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MyOrdersPage()),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: const Icon(
+                  Icons.receipt_long, // icon đơn hàng
                   color: Colors.black,
                   size: 24,
                 ),
